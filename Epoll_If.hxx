@@ -7,10 +7,14 @@
 
 
 #include "Descriptor.hxx"
+#include "DataModel.hxx"
 
 class Epoll_If {
 public:
     Epoll_If(){init();};
+
+    Epoll_If(DataModel *model);
+
     void init();
     void event_loop();
     void add_server_descriptor(int fd);
@@ -21,6 +25,9 @@ public:
     int epollfd;
 
     void set_fd(int io, Descriptor* desc);
+
+private:
+    DataModel *model;
 };
 
 

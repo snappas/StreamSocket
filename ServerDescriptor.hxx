@@ -7,10 +7,12 @@
 
 
 #include "Descriptor.hxx"
+#include "DataModel.hxx"
 
 class ServerDescriptor : public Descriptor {
 public:
     ServerDescriptor(int fd): Descriptor(Descriptor::SERVER, fd){};
+
     ~ServerDescriptor();
     int accept_nonblocking();
 

@@ -3,13 +3,10 @@
 //
 
 #include "Epoll_If.hxx"
-#include "Descriptor.hxx"
 #include "ServerDescriptor.hxx"
 #include "ClientDescriptor.hxx"
 #include "FileDescriptor.hxx"
 #include <sys/epoll.h>
-#include <iostream>
-#include <stdio.h>
 
 
 void Epoll_If::event_loop() {
@@ -20,7 +17,7 @@ void Epoll_If::event_loop() {
     for (int i = 0; i < descriptors_count; ++i) {
         Descriptor* desc = reinterpret_cast<Descriptor*>(events[i].data.ptr);
         if(events[i].events & EPOLLOUT || events[i].events & EPOLLIN) {
-            switch (desc->getType()) {
+            switch (desc->get_type()) {
                 case Descriptor::SERVER:
                 {
                     ServerDescriptor *sd = reinterpret_cast<ServerDescriptor *>(events[i].data.ptr);
@@ -73,7 +70,7 @@ void Epoll_If::add_server_descriptor(int fd) {
 void Epoll_If::add_client_descriptor(int fd) {
     epoll_event event;
     if (fd != -1) {
-        event.data.ptr = new ClientDescriptor(fd);
+        event.data.ptr = new ClientDescriptor(fd, model);
         event.events = EPOLLIN | EPOLLET | EPOLLONESHOT;
         if (epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &event) == -1) {
             perror("epoll_ctl epolladd");
@@ -84,7 +81,7 @@ void Epoll_If::add_client_descriptor(int fd) {
 void Epoll_If::add_file_descriptor(int fd) {
     epoll_event event;
     if (fd != -1) {
-        event.data.ptr = new FileDescriptor(fd);
+        event.data.ptr = new FileDescriptor(fd, model);
         event.events = EPOLLIN | EPOLLET | EPOLLONESHOT;
         if (epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &event) == -1) {
             perror("epoll_ctl epolladd");
@@ -97,19 +94,23 @@ void Epoll_If::set_fd(int io, Descriptor* desc) {
     event.data.ptr = desc;
     if(io == Descriptor::WRITABLE){
         event.events = EPOLLET | EPOLLOUT | EPOLLONESHOT;
-        if (epoll_ctl(epollfd, EPOLL_CTL_MOD, desc->getDescriptor(), &event) != 0) {
+        if (epoll_ctl(epollfd, EPOLL_CTL_MOD, desc->get_descriptor(), &event) != 0) {
             perror("epoll_ctl epollout");
         }
     }else if(io == Descriptor::READABLE){
         event.events = EPOLLET | EPOLLIN | EPOLLONESHOT;
-        if (epoll_ctl(epollfd, EPOLL_CTL_MOD, desc->getDescriptor(), &event) != 0) {
+        if (epoll_ctl(epollfd, EPOLL_CTL_MOD, desc->get_descriptor(), &event) != 0) {
             perror("epoll_ctl epollin");
         }
     } else {
-        if (epoll_ctl(epollfd, EPOLL_CTL_DEL, desc->getDescriptor(), &event) != 0) {
-            perror("epoll_ctl epollin");
+        if (epoll_ctl(epollfd, EPOLL_CTL_DEL, desc->get_descriptor(), &event) != 0) {
+            perror("epoll_ctl epolldel");
         }
         delete desc;
     }
 
+}
+
+Epoll_If::Epoll_If(DataModel *model) : model(model) {
+    init();
 }

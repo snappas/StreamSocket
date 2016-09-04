@@ -5,12 +5,17 @@
 #ifndef STREAMSOCKET_FILEDESCRIPTOR_HXX
 #define STREAMSOCKET_FILEDESCRIPTOR_HXX
 
+#include <stdio.h>
 
 #include "Descriptor.hxx"
+#include "DataModel.hxx"
 
 class FileDescriptor : public Descriptor {
 public:
     FileDescriptor(int fd) : Descriptor(Descriptor::FILE, fd) {};
+
+    FileDescriptor(int fd, DataModel *model);
+
     ~FileDescriptor();
 
     int do_io(unsigned int i);
@@ -21,6 +26,7 @@ public:
 
 private:
     _IO_FILE *stream;
+    DataModel *model;
 };
 
 

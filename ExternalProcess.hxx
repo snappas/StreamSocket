@@ -9,7 +9,8 @@
 class ExternalProcess {
 public:
     ExternalProcess(std::string command);
-    int getFileDescriptor();
+
+    int get_file_descriptor();
 private:
     std::string command;
 };

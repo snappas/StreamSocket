@@ -8,6 +8,9 @@
 #include <iostream>
 #include "FileDescriptor.hxx"
 
+FileDescriptor::FileDescriptor(int fd, DataModel *model) : Descriptor(Descriptor::FILE, fd), model(model) {
+}
+
 int FileDescriptor::do_io(unsigned int i) {
     if (i & EPOLLOUT) {
         return do_write();
@@ -31,6 +34,7 @@ int FileDescriptor::do_read() {
         size_t buffer_size;
         ssize_t bytes_read = getline(&buffer, &buffer_size, stream);
         if(bytes_read != -1){
+            model->parse_data(std::string(buffer));
             std::cout << buffer << std::endl;
             return Descriptor::READABLE;
         }else{

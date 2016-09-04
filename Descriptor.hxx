@@ -20,9 +20,12 @@ public:
         ERROR = 3
     };
     Descriptor(int type, int fd):type(type), fd(fd){};
-    virtual ~Descriptor() = 0;
-    int getType(){return type;}
-    int getDescriptor(){return fd;}
+
+    virtual ~Descriptor() {};
+
+    int get_type() { return type; }
+
+    int get_descriptor() { return fd; }
 protected:
     int type;
     int fd;

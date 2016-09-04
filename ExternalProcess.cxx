@@ -10,7 +10,7 @@ ExternalProcess::ExternalProcess(std::string command):command(command) {
 
 }
 
-int ExternalProcess::getFileDescriptor() {
+int ExternalProcess::get_file_descriptor() {
     FILE* pipe = popen(command.c_str(), "r");
     if(!pipe){
         return -1;
