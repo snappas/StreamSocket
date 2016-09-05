@@ -17,8 +17,7 @@ void Epoll_If::event_loop() {
         Descriptor* desc = reinterpret_cast<Descriptor*>(events[i].data.ptr);
         if(events[i].events & EPOLLOUT || events[i].events & EPOLLIN) {
             switch (desc->get_type()) {
-                case Descriptor::SERVER:
-                {
+                case Descriptor::SERVER: {
                     ServerDescriptor *sd = reinterpret_cast<ServerDescriptor *>(events[i].data.ptr);
                     int peer_fd = sd->accept_nonblocking();
                     if (peer_fd != -1) {
@@ -26,16 +25,12 @@ void Epoll_If::event_loop() {
                     }
                     break;
                 }
-
-                case Descriptor::CLIENT:
-                {
+                case Descriptor::CLIENT: {
                     ClientDescriptor *cd = reinterpret_cast<ClientDescriptor *>(events[i].data.ptr);
                     set_fd(cd->do_io(events[i].events), cd);
                     break;
                 }
-
-                case Descriptor::FILE:
-                {
+                case Descriptor::FILE: {
                     FileDescriptor *fd = reinterpret_cast<FileDescriptor*>(events[i].data.ptr);
                     set_fd(fd->do_io(events[i].events), fd);
                     break;
@@ -68,13 +63,14 @@ void Epoll_If::add_descriptor(int type, int fd) {
 void Epoll_If::set_fd(int io, Descriptor* desc) {
     epoll_event event;
     event.data.ptr = desc;
-    if(io == Descriptor::WRITABLE){
-        event.events = EPOLLET | EPOLLOUT | EPOLLONESHOT;
+    event.events = EPOLLET | EPOLLONESHOT;
+    if (io == Descriptor::WRITABLE) {
+        event.events |= EPOLLOUT;
         if (epoll_ctl(epollfd, EPOLL_CTL_MOD, desc->get_descriptor(), &event) != 0) {
             perror("epoll_ctl epollout");
         }
-    }else if(io == Descriptor::READABLE){
-        event.events = EPOLLET | EPOLLIN | EPOLLONESHOT;
+    } else if (io == Descriptor::READABLE) {
+        event.events |= EPOLLIN;
         if (epoll_ctl(epollfd, EPOLL_CTL_MOD, desc->get_descriptor(), &event) != 0) {
             perror("epoll_ctl epollin");
         }
