@@ -15,7 +15,7 @@ ExternalProcess &ExternalProcess::start_process() {
     return *this;
 }
 
-int ExternalProcess::get_file_descriptor() {
+int ExternalProcess::get_descriptor() {
     if(!pipe){
         return -1;
     }else {

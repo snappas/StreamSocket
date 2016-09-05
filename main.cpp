@@ -8,8 +8,8 @@ int main() {
     DataModel temperature;
     Epoll_If epoll(&temperature);
     Server server("127.0.0.1", 32001);
-    epoll.add_descriptor(Descriptor::SERVER, server.get_server_file_descriptor());
-    epoll.add_descriptor(Descriptor::FILE, telnet.start_process().get_file_descriptor());
+    epoll.add_descriptor(Descriptor::SERVER, server.get_descriptor());
+    epoll.add_descriptor(Descriptor::FILE, telnet.start_process().get_descriptor());
     while(1){
         epoll.event_loop();
     }

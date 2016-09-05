@@ -45,6 +45,6 @@ void Server::listen_socket() {
     }
 }
 
-int Server::get_server_file_descriptor() {
+int Server::get_descriptor() {
     return listen_fd;
 }

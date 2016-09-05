@@ -16,7 +16,7 @@ public:
 
     void listen_socket();
 
-    int get_server_file_descriptor();
+    int get_descriptor();
 
 private:
     int listen_fd;

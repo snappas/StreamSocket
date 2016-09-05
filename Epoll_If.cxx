@@ -35,7 +35,6 @@ void Epoll_If::event_loop() {
                     set_fd(fd->do_io(events[i].events), fd);
                     break;
                 }
-
                 default:
                     continue;
             }
@@ -64,6 +63,7 @@ void Epoll_If::set_fd(int io, Descriptor* desc) {
     epoll_event event;
     event.data.ptr = desc;
     event.events = EPOLLET | EPOLLONESHOT;
+
     if (io == Descriptor::WRITABLE) {
         event.events |= EPOLLOUT;
         if (epoll_ctl(epollfd, EPOLL_CTL_MOD, desc->get_descriptor(), &event) != 0) {

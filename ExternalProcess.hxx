@@ -11,7 +11,8 @@ public:
     ExternalProcess(std::string command);
 
     ExternalProcess &start_process();
-    int get_file_descriptor();
+
+    int get_descriptor();
 private:
     std::string command;
     FILE *pipe;
