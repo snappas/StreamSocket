@@ -59,7 +59,6 @@ void Epoll_If::add_descriptor(int type, int fd) {
     epoll_event event;
     if (fd != -1) {
         event.data.ptr = Descriptor::make_descriptor(type, fd, model, &event);
-        event.events = EPOLLIN | EPOLLET;
         if (epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &event) == -1) {
             perror("epoll_ctl");
         }
