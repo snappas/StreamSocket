@@ -28,22 +28,22 @@ int ClientDescriptor::do_write() {
     size_t length = write_buffer.length();
     ssize_t bytes_sent = 0;
 
-    while (length != 0 && (bytes_sent = write(fd, outgoing_message, length)) != -1) {
+    while ((bytes_sent = write(fd, outgoing_message, length)) != -1 && length != 0) {
         outgoing_message += bytes_sent;
         length -= bytes_sent;
     }
 
     if (bytes_sent == -1) {
         if (errno == EAGAIN) {
-            std::string remainder(outgoing_message, length);
-            write_buffer = remainder;
-            return Descriptor::WRITABLE;
-        } else {
-            return Descriptor::ERROR;
+            write_buffer = std::string(outgoing_message, length);
+            return Descriptor::WRITABLE; /* write didn't finish, write again */
+        } else if (length != 0) {
+            write_buffer.clear();
+            return Descriptor::ERROR; /* error on writing */
         }
     }
     write_buffer.clear();
-    return Descriptor::READABLE;
+    return Descriptor::READABLE; /* write was successful */
 }
 
 int ClientDescriptor::do_read() {
@@ -52,7 +52,7 @@ int ClientDescriptor::do_read() {
 
     while ((bytes_received = read(fd, buf, sizeof buf)) > 0) {
         read_buffer.append(buf, (unsigned long) bytes_received);
-        std::memset(buf, 0, 4096); //reset the buffer for the next read
+        std::memset(buf, 0, 4096); /* reset the buffer */
     }
 
     if (bytes_received < 0) {
@@ -66,15 +66,16 @@ int ClientDescriptor::do_read() {
             if (model->parse_request(&read_buffer) == DataModel::GOOD_REQUEST) {
                 write_buffer = std::string(read_buffer);
                 read_buffer.clear();
-                return Descriptor::WRITABLE;
+                return Descriptor::WRITABLE; /* got a good request, respond to it */
             } else {
-                return Descriptor::READABLE;
+                read_buffer.clear();
+                return Descriptor::READABLE; /* bad request, wait for a new one */
             }
         } else {
-            return Descriptor::READABLE;
+            return Descriptor::READABLE; /* didn't recv the whole msg, read again */
         }
     }
-    return Descriptor::ERROR;
+    return Descriptor::ERROR; /* client disconnect possibly, 0 bytes read */
 }
 
 ClientDescriptor::~ClientDescriptor() {
