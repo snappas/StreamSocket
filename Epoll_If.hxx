@@ -11,23 +11,19 @@
 
 class Epoll_If {
 public:
-    Epoll_If(){init();};
-
+    Epoll_If() { init(); }
     Epoll_If(DataModel *model);
 
     void init();
     void event_loop();
-    void add_server_descriptor(int fd);
-    void add_file_descriptor(int fd);
-    void add_client_descriptor(int fd);
 
-
-    int epollfd;
-
+    void add_descriptor(int type, int fd);
     void set_fd(int io, Descriptor* desc);
 
 private:
     DataModel *model;
+    int epollfd;
+
 };
 
 

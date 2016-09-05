@@ -10,9 +10,11 @@ class ExternalProcess {
 public:
     ExternalProcess(std::string command);
 
+    ExternalProcess &start_process();
     int get_file_descriptor();
 private:
     std::string command;
+    FILE *pipe;
 };
 
 

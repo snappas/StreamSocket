@@ -6,7 +6,6 @@
 #include "ServerDescriptor.hxx"
 #include "ClientDescriptor.hxx"
 #include "FileDescriptor.hxx"
-#include <sys/epoll.h>
 
 
 void Epoll_If::event_loop() {
@@ -23,7 +22,7 @@ void Epoll_If::event_loop() {
                     ServerDescriptor *sd = reinterpret_cast<ServerDescriptor *>(events[i].data.ptr);
                     int peer_fd = sd->accept_nonblocking();
                     if (peer_fd != -1) {
-                        add_client_descriptor(peer_fd);
+                        add_descriptor(Descriptor::CLIENT, peer_fd);
                     }
                     break;
                 }
@@ -56,35 +55,13 @@ void Epoll_If::init() {
     epollfd = epoll_create1(0);
 }
 
-void Epoll_If::add_server_descriptor(int fd) {
+void Epoll_If::add_descriptor(int type, int fd) {
     epoll_event event;
     if (fd != -1) {
-        event.data.ptr = new ServerDescriptor(fd);
+        event.data.ptr = Descriptor::make_descriptor(type, fd, model, &event);
         event.events = EPOLLIN | EPOLLET;
         if (epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &event) == -1) {
             perror("epoll_ctl");
-        }
-    }
-}
-
-void Epoll_If::add_client_descriptor(int fd) {
-    epoll_event event;
-    if (fd != -1) {
-        event.data.ptr = new ClientDescriptor(fd, model);
-        event.events = EPOLLIN | EPOLLET | EPOLLONESHOT;
-        if (epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &event) == -1) {
-            perror("epoll_ctl epolladd");
-        }
-    }
-}
-
-void Epoll_If::add_file_descriptor(int fd) {
-    epoll_event event;
-    if (fd != -1) {
-        event.data.ptr = new FileDescriptor(fd, model);
-        event.events = EPOLLIN | EPOLLET | EPOLLONESHOT;
-        if (epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &event) == -1) {
-            perror("epoll_ctl epolladd");
         }
     }
 }

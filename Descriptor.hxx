@@ -6,6 +6,9 @@
 #define STREAMSOCKET_DESCRIPTOR_HXX
 
 
+#include "DataModel.hxx"
+#include <sys/epoll.h>
+
 class Descriptor {
 
 public:
@@ -26,6 +29,9 @@ public:
     int get_type() { return type; }
 
     int get_descriptor() { return fd; }
+
+    static Descriptor *make_descriptor(int type, int fd,
+                                       DataModel *model, epoll_event *event);
 protected:
     int type;
     int fd;
